@@ -1,0 +1,650 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Todolist",
+    "description": "Open api for Todolist RESTfull API",
+    "version": "0.0.1",
+    "termsOfService": "https://angga-ari.com/terms.html",
+    "contact": {
+      "name": "Angga Ari Wijaya",
+      "email": "anggadarkprince@gmail.com",
+      "url": "https://angga-ari.com"
+    },
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENCE-2.0"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{environment}-todo.angga-ari.com/api/v1",
+      "description": "Todolist server",
+      "variables": {
+        "environment": {
+          "default": "dev",
+          "description": "Server environment type",
+          "enum": [
+            "dev",
+            "test",
+            "prod"
+          ]
+        }
+      }
+    }
+  ],
+  "externalDocs": {
+    "description": "Documentation of Todolist API",
+    "url": "https://docs.todo.angga-ari.com"
+  },
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login user to get token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "maxLength": 50
+                  }
+                }
+              },
+              "examples": {
+                "user": {
+                  "description": "Example user login",
+                  "value": {
+                    "email": "anggadarkprince@gmail.com",
+                    "password": "secret123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success user login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "description": "Login success",
+                    "value": {
+                      "access_token": "252kj3b52jh235j2h5bv23jbh2342",
+                      "user": {
+                        "id": "3425-235234-235234",
+                        "name": "Angga Ari Wijaya",
+                        "username": "anggadarkprince",
+                        "email": "angga.aw92@gmail.com"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Failed user login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "failed": {
+                    "description": "Login failed",
+                    "value": {
+                      "status": "Unauthorized",
+                      "message": "Username or password wrong"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "email": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "maxLength": 50
+                  }
+                }
+              },
+              "examples": {
+                "user": {
+                  "description": "Example user register",
+                  "value": {
+                    "name": "Angga Ari Wijaya",
+                    "email": "anggadarkprince@gmail.com",
+                    "password": "secret123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success user register",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "description": "Register success",
+                    "value": {
+                      "status": "OK",
+                      "message": "User successfully registered"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/todolist": {
+      "get": {
+        "tags": [
+          "Todolist"
+        ],
+        "summary": "Get all todolist",
+        "description": "Get all active todolist by default",
+        "security": [
+          {
+            "TodoListAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_done",
+            "in": "query",
+            "required": false,
+            "description": "Is included done todolist",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "Filter todolist by name",
+            "schema": {
+              "type": "string",
+              "nullable": true,
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "examples": {
+              "buy coffee": {
+                "description": "Example buy coffee",
+                "value": "Buy a cup of coffee"
+              },
+              "do home work": {
+                "description": "Example do home work",
+                "value": "Do math home work"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success get todolist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArrayTodolist"
+                },
+                "examples": {
+                  "success": {
+                    "description": "Example success get all todolist",
+                    "value": [
+                      {
+                        "id": 1,
+                        "name": "Java",
+                        "priority": 3,
+                        "tags": [
+                          "Java",
+                          "Programming"
+                        ]
+                      },
+                      {
+                        "id": 2,
+                        "name": "PHP",
+                        "priority": 2,
+                        "tags": [
+                          "PHP",
+                          "Programming"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Todolist"
+        ],
+        "summary": "Create new todolist",
+        "description": "Create new todolist to database",
+        "security": [
+          {
+            "TodoListAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrUpdateTodolist"
+              },
+              "examples": {
+                "todo learn java": {
+                  "description": "Todolist to learn Java programming",
+                  "value": {
+                    "name": "Learn Java",
+                    "priority": 3,
+                    "tags": [
+                      "Java",
+                      "Programming"
+                    ]
+                  }
+                },
+                "todo learn php": {
+                  "description": "Todolist to learn Php programming",
+                  "value": {
+                    "name": "Learn PHP",
+                    "priority": 3,
+                    "tags": [
+                      "PHP",
+                      "Programming"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success save todolist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Todolist"
+                },
+                "examples": {
+                  "todo learn java": {
+                    "description": "Success create java todolist",
+                    "value": {
+                      "id": 1,
+                      "name": "Java",
+                      "priority": 3,
+                      "tags": [
+                        "Java",
+                        "Programming"
+                      ]
+                    }
+                  },
+                  "todo learn php": {
+                    "description": "Success create learn PHP todolist",
+                    "value": {
+                      "id": 2,
+                      "name": "PHP",
+                      "priority": 2,
+                      "tags": [
+                        "PHP",
+                        "Programming"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/todolist/{todolistId}": {
+      "put": {
+        "tags": [
+          "Todolist"
+        ],
+        "summary": "Update existing todolist",
+        "description": "Update existing todolist to database",
+        "security": [
+          {
+            "TodoListAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TodolistId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrUpdateTodolist"
+              },
+              "examples": {
+                "todo learn java": {
+                  "description": "Todolist to learn Java programming",
+                  "value": {
+                    "name": "Learn Java",
+                    "priority": 3,
+                    "tags": [
+                      "Java",
+                      "Programming"
+                    ]
+                  }
+                },
+                "todo learn php": {
+                  "description": "Todolist to learn Php programming",
+                  "value": {
+                    "name": "Learn PHP",
+                    "priority": 3,
+                    "tags": [
+                      "PHP",
+                      "Programming"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success update todolist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Todolist"
+                },
+                "examples": {
+                  "todo learn java": {
+                    "description": "Success update java todolist",
+                    "value": {
+                      "id": 1,
+                      "name": "Java",
+                      "priority": 3,
+                      "tags": [
+                        "Java",
+                        "Programming"
+                      ]
+                    }
+                  },
+                  "todo learn php": {
+                    "description": "Success update learn PHP todolist",
+                    "value": {
+                      "id": 2,
+                      "name": "PHP",
+                      "priority": 2,
+                      "tags": [
+                        "PHP",
+                        "Programming"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Todolist"
+        ],
+        "summary": "Delete existing todolist",
+        "description": "Delete existing todolist to database",
+        "security": [
+          {
+            "TodoListAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TodolistId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success delete todolist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "description": "Example success delete",
+                    "value": {
+                      "success": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Failed delete not found todolist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "examples": {
+                  "failed": {
+                    "description": "Example failed delete todolist",
+                    "value": {
+                      "success": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "TodoListAuth": {
+        "description": "Authentication for todolist API",
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-KEY"
+      }
+    },
+    "parameters": {
+      "TodolistId": {
+        "name": "todolistId",
+        "in": "path",
+        "required": true,
+        "description": "Existing todolist in database",
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "examples": {
+          "java": {
+            "value": 1,
+            "description": "Sample todo list id for Java"
+          },
+          "php": {
+            "value": 2,
+            "description": "Sample todo list id for PHP"
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Todolist": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "number",
+            "format": "int32"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CreateOrUpdateTodolist": {
+        "type": "object",
+        "required": [
+          "name",
+          "priority"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "priority": {
+            "type": "number",
+            "format": "int32",
+            "default": 1
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "ArrayTodolist": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Todolist"
+        }
+      }
+    }
+  }
+}
